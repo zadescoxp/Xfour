@@ -35,9 +35,7 @@ export default function Req() {
   return (
     <div className="h-screen w-screen flex items-center justify-center">
       <div className="flex flex-col justify-center h-1/2 w-[25rem] gap-5">
-        <h1 className="uppercase text-2xl text-center font-bold">
-          Enter your details
-        </h1>
+        <h1 className="uppercase text-7xl text-center font-semibold">XFOUR</h1>
         <input
           type="text"
           placeholder="Name"
