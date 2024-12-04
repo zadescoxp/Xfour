@@ -33,3 +33,13 @@ input:hover,
 select:hover {
   border: black 2px solid;
 }
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+::-webkit-scrollbar-track {
+  background: lightgray;
+}
