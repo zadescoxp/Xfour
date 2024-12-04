@@ -4,7 +4,9 @@ import { model } from "@/api/gemini";
 import { useState } from "react";
 import { final } from "@/components/req";
 import { chats } from "@/utils/chats";
-import { useRef } from "react";
+import { remark } from "remark";
+import html from "remark-html";
+import matter from "gray-matter";
 
 export default function Test() {
   const name = final[0];
@@ -17,6 +19,7 @@ export default function Test() {
   const speedLabel = final[7];
 
   const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const chat = model.startChat({
     history: [
@@ -36,96 +39,78 @@ export default function Test() {
   });
   const getChat = async (prompt: { prompt: string }) => {
     try {
+      setLoading(true);
       const result = await chat.sendMessage(prompt);
       console.log(result.response.text());
+      const matterResult = matter(result.response.text());
+      const generatedContent = await remark()
+        .use(html)
+        .process(matterResult.content);
+      const contentHTML = generatedContent.toString();
+      chats.push({ role: "model", message: `${contentHTML}` });
+      setLoading(false);
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  // Audio recording
-
-  const audioRef = useRef<MediaRecorder | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    audioRef.current = mediaRecorder;
-
-    mediaRecorder.start();
-    setIsRecording(true);
-
-    mediaRecorder.ondataavailable = (event) => {
-      const audioBlob = new Blob([event.data], { type: "audio/wav" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      console.log("Audio URL:", audioUrl);
-      // You can upload the audioBlob to your server here
-    };
-
-    mediaRecorder.onstop = () => {
-      setIsRecording(false);
-    };
-  };
-
-  const stopRecording = () => {
-    if (audioRef.current) {
-      audioRef.current.stop();
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen">
       <div className="h-[95%] w-1/2">
-        <div className="flex flex-col items-center h-[95%] w-full justify-center"></div>
-        <div className="flex justify-center gap-5 h-[5%] w-full">
+        <div className="flex flex-col items-start overflow-scroll overflow-x-auto gap-5 p-4 h-[95%] w-full">
+          {chats.map((chat, index) => {
+            return chat.role === "model" ? (
+              <div key={index} className="">
+                <p className="text-md pl-3 -mb-1">XFOUR</p>
+                <p
+                  className="text-sm bg-[#e4e4e4] text-black p-4 rounded-md m-2"
+                  dangerouslySetInnerHTML={{
+                    __html: chat.message,
+                  }}
+                ></p>
+              </div>
+            ) : (
+              <div key={index} className="">
+                <p className="text-md pl-3 -mb-1">{name}</p>
+                <p className="text-sm bg-black text-white p-4 rounded-md m-2">
+                  {chat.message}
+                </p>
+              </div>
+            );
+          })}
+          {loading ? <p className="pl-3">Thinking...</p> : ""}
+        </div>
+        <div className="flex justify-center gap-5 h-[5%] w-full px-4">
           <input
-            className="w-max"
+            className="w-full"
             type="text"
             placeholder="Ask me anything..."
             value={prompt}
             onChange={(e) => {
               setPrompt(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if (e.key == "Enter" && !e.shiftKey) {
+                if (prompt.length > 0) {
+                  e.preventDefault();
+                  getChat(prompt);
+                  chats.push({ role: "user", message: prompt });
+                  setPrompt("");
+                }
+              }
+            }}
           />
           <button
             className="bg-black text-white p-4 rounded-md hover:bg-[#444] transition-all flex items-center justify-center"
             onClick={() => {
-              getChat(prompt);
-              chats.push(`user : ${prompt}`);
-              setPrompt("");
-            }}
-          >
-            Send
-          </button>
-          <input
-            type="file"
-            className="hidden"
-            id="fileInput"
-            onChange={(e) => {
-              // Handle file input
-            }}
-          />
-          <label
-            htmlFor="fileInput"
-            className="bg-yellow-500 text-white p-4 rounded-md hover:bg-yellow-700 transition-all flex items-center justify-center cursor-pointer"
-          >
-            Upload File
-          </label>
-
-          <button
-            className={`bg-blue-500 text-white p-4 rounded-md hover:bg-blue-700 transition-all flex items-center justify-center ${
-              isRecording ? "bg-red-500" : ""
-            }`}
-            onClick={() => {
-              if (isRecording) {
-                stopRecording();
-              } else {
-                startRecording();
+              if (prompt.length > 0) {
+                getChat(prompt);
+                chats.push({ role: "user", message: prompt });
+                setPrompt("");
               }
             }}
           >
-            {isRecording ? "Stop Recording" : "Record Audio"}
+            Send
           </button>
         </div>
       </div>
