@@ -13,10 +13,23 @@ body {
   background: #ffffff;
   color: #000000;
   font-family: "Poppins", sans-serif;
+  overflow-x: hidden;
 }
 input,
 select {
   padding: 8px 10px 8px 10px;
-  border: lightgray 3px solid;
+  border: lightgray 2px solid;
   border-radius: 6px;
+  color: black;
+  font-size: 14px;
+  outline: none;
+}
+input:focus,
+select:focus {
+  border: black 2px solid;
+}
+
+input:hover,
+select:hover {
+  border: black 2px solid;
 }
