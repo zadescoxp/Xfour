@@ -1,3 +1,9 @@
+import Req from "@/components/req";
+
 export default function Home() {
-  return <div></div>;
+  return (
+    <div>
+      <Req />
+    </div>
+  );
 }
