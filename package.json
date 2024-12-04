@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "gray-matter": "^4.0.3",
     "next": "15.0.3",
     "react": "^18.0.0",
     "react-cool-onclickoutside": "^1.7.0",
     "react-dom": "^18.0.0",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
     "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
